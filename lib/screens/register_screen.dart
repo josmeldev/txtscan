@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import '../services/auth_service.dart';
+import 'home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,6 +16,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void dispose() {
@@ -22,6 +29,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+  
+  // Método para registrar usuario
+  Future<void> _register() async {
+    // Validar campos
+    if (_fullNameController.text.isEmpty || 
+        _emailController.text.isEmpty || 
+        _phoneController.text.isEmpty || 
+        _passwordController.text.isEmpty || 
+        _confirmPasswordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Por favor, completa todos los campos';
+      });
+      return;
+    }
+    
+    // Validar que las contraseñas coincidan
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _errorMessage = 'Las contraseñas no coinciden';
+      });
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    
+    try {
+      // Crear mapa de datos de usuario para almacenar en Database
+      final userData = {
+        'fullName': _fullNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+      };
+      
+      // Registrar con Firebase Auth y almacenar datos en Realtime Database
+      final user = await _authService.registerWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
+        userData
+      );
+      
+      if (user != null && context.mounted) {
+        // Navegar a la pantalla de inicio
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -168,26 +237,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 30),
                     
+                    // Mensaje de error
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      
                     // Botón de registro
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Aquí iría la lógica de registro
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF005AA3),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                      child: _isLoading
+                        ? const SpinKitCircle(color: Color(0xFF005AA3), size: 40.0)
+                        : ElevatedButton(
+                            onPressed: _register,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF005AA3),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            child: const Text(
+                              'Registrarse',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Registrarse',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 20),
                     

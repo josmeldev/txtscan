@@ -39,6 +39,9 @@ dependencies:
   firebase_core: ^2.25.4
   firebase_auth: ^4.17.4
   cloud_firestore: ^4.15.4
+  firebase_database: ^10.4.5  # Para Realtime Database
+  firebase_storage: ^11.6.5    # Para almacenamiento de archivos (opcional)
+  flutter_spinkit: ^5.2.0      # Para indicadores de carga
 
 dev_dependencies:
   flutter_test:

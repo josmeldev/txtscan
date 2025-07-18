@@ -23,35 +23,37 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D1A2A),
+      // Agregamos resizeToAvoidBottomInset para manejar el teclado
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30.0),
-              child: Column(
-                children: [
-                  // Logo and app name
-                  Image.asset(
-                    'assets/images/txtscan-logo.png',
-                    width: 250,
-                    height: 180,
-                  ),
-                  const SizedBox(height: 10),
-                  
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30.0),
+                child: Column(
+                  children: [
+                    // Logo and app name
+                    Image.asset(
+                      'assets/images/txtscan-logo.png',
+                      width: 250,
+                      height: 180,
+                    ),
+                    const SizedBox(height: 10),
+                    
+                  ],
+                ),
               ),
-            ),
-            
-            const Text(
-              'Ingresar',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+              
+              const Text(
+                'Ingresar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
-            ),
-            
-            Expanded(
-              child: Container(
+              
+              Container(
                 margin: const EdgeInsets.only(top: 20),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -59,6 +61,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
+                ),
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height * 0.6,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -154,8 +159,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

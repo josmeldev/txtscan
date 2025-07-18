@@ -1,0 +1,88 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Archivos de configuración local que no deberían compartirse
+local.properties
+keystore.properties
+key.jks
+
+# Archivos y carpetas específicas del sistema operativo
+.fvm/
+.vscode/
+.idea/
+.gradle/
+*.iml
+
+# Archivos generados por el IDE y compiladores
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.mocks.dart
+
+# Directorios de dependencias
+.ios/Pods/
+.ios/Flutter/Flutter.podspec
+.ios/.symlinks/
+.android/
+.gradle/
+
+# Archivos de configuración personal
+.env
+.env.*
+*.env
+
+# Archivos generados por herramientas de CI/CD
+coverage/
+fastlane/report.xml
+**/fastlane/README.md
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Firebase configuración
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_app_id_file.json

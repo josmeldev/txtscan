@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 import '../services/auth_service.dart';
 import 'main_screen.dart';
 
@@ -30,16 +31,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     // Validar campos
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'Por favor, completa todos los campos';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Por favor, completa todos los campos';
+        });
+      }
       return;
     }
     
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+    }
     
     try {
       // Iniciar sesión con Firebase
@@ -48,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text
       );
       
-      if (user != null && context.mounted) {
+      if (user != null && mounted && context.mounted) {
         // Forzamos la navegación a la pantalla principal después del login
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -58,9 +63,11 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -162,7 +169,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
                           child: const Text('¿Olvidaste tu contraseña?'),
                         ),
                       ),

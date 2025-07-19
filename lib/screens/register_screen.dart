@@ -39,24 +39,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _phoneController.text.isEmpty || 
         _passwordController.text.isEmpty || 
         _confirmPasswordController.text.isEmpty) {
-      setState(() {
-        _errorMessage = 'Por favor, completa todos los campos';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Por favor, completa todos los campos';
+        });
+      }
       return;
     }
     
     // Validar que las contraseñas coincidan
     if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _errorMessage = 'Las contraseñas no coinciden';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Las contraseñas no coinciden';
+        });
+      }
       return;
     }
     
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+    }
     
     try {
       // Crear mapa de datos de usuario para almacenar en Database
@@ -73,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         userData
       );
       
-      if (user != null && context.mounted) {
+      if (user != null && mounted && context.mounted) {
         // Forzamos la navegación a la pantalla principal después del registro
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -83,9 +89,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

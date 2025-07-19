@@ -22,28 +22,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
       final user = _authService.currentUser;
       if (user != null) {
         final data = await _authService.getUserData(user.uid);
-        setState(() {
-          userData = data;
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            userData = data;
+            isLoading = false;
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error al cargar datos del usuario: $e');
+      if (mounted) {
         setState(() {
           isLoading = false;
         });
       }
-    } catch (e) {
-      print('Error al cargar datos del usuario: $e');
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 

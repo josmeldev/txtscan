@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -48,12 +49,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _signOut() async {
     try {
+      print('Iniciando cierre de sesión');
+      
+      // Primero cerramos sesión en Firebase
       await _authService.signOut();
-      // La navegación será manejada por el AuthStateWrapper
+      
+      print('Sesión cerrada correctamente');
+      
+      // Forzar la navegación a login
+      if (context.mounted) {
+        // Esta es la forma más directa: reemplazar toda la navegación con LoginScreen
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false, // Eliminar todas las rutas anteriores
+        );
+      }
+      
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al cerrar sesión: $e')),
-      );
+      print('Error al cerrar sesión: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al cerrar sesión: $e')),
+        );
+      }
     }
   }
 

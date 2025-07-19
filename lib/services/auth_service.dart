@@ -9,7 +9,14 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
 
   // Estado de autenticación como stream
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<User?> get authStateChanges {
+    // Añadir un listener para depuración
+    final stream = _auth.authStateChanges();
+    stream.listen((User? user) {
+      print('AuthService: Cambio detectado en el estado de autenticación - Usuario: ${user?.email ?? 'Ninguno'}');
+    });
+    return stream;
+  }
 
   // Iniciar sesión con email y contraseña
   Future<User?> signInWithEmailAndPassword(String email, String password) async {
@@ -81,7 +88,14 @@ class AuthService {
 
   // Cerrar sesión
   Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      print('AuthService: Cerrando sesión');
+      await _auth.signOut();
+      print('AuthService: Sesión cerrada correctamente');
+    } catch (e) {
+      print('AuthService: Error al cerrar sesión - $e');
+      throw Exception('No se pudo cerrar la sesión: $e');
+    }
   }
 
   // Recuperar contraseña

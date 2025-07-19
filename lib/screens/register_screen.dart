@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../services/auth_service.dart';
-// Ya no necesitamos importar home_screen.dart porque la navegación 
-// es manejada por auth_state_wrapper.dart
+import 'main_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -75,8 +74,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       
       if (user != null && context.mounted) {
-        // No necesitamos navegar manualmente, el AuthStateWrapper se encargará
-        // de dirigir al usuario a la MainScreen cuando detecte que está autenticado
+        // Forzamos la navegación a la pantalla principal después del registro
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+          (route) => false, // Esto elimina todas las rutas anteriores
+        );
       }
     } catch (e) {
       setState(() {

@@ -8,7 +8,7 @@ class ReportsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reportes', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0D1A2A),
         centerTitle: true,
       ),
       body: Center(

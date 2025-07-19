@@ -40,25 +40,30 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue.shade900,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: const Color(0xFF0D1A2A),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white.withOpacity(0.6),
         onTap: _onItemTapped,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
             label: 'Resultados',
+            backgroundColor: const Color(0xFF0D1A2A),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: 'Reportes',
+            backgroundColor: const Color(0xFF0D1A2A),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Detectar',
+            backgroundColor: const Color(0xFF0D1A2A),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Perfil',
+            backgroundColor: const Color(0xFF0D1A2A),
           ),
         ],
       ),

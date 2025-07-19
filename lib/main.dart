@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
 import 'firebase_options.dart';
 import 'auth_state_wrapper.dart';
 
 void main() async {
+  // Agregar manejo de errores no capturados
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    print('FlutterError: ${details.toString()}');
+  };
+
+  // Asegurarse de que Flutter esté inicializado correctamente
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar Firebase con mejor manejo de errores
   try {
-    // Asegurarse de que Flutter esté inicializado
-    WidgetsFlutterBinding.ensureInitialized();
-    
-    // Inicializar Firebase con manejo de errores
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    
     print('Firebase inicializado correctamente');
-  } catch (e) {
+  } catch (e, stackTrace) {
     print('Error al inicializar Firebase: $e');
+    print('Stack trace: $stackTrace');
     // Continúa ejecutando la app sin Firebase por ahora
   }
   

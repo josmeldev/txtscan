@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_screen.dart'; // Cambiado de home_screen.dart a main_screen.dart
 import 'services/auth_service.dart';
 
 class AuthStateWrapper extends StatelessWidget {
@@ -20,8 +20,8 @@ class AuthStateWrapper extends StatelessWidget {
             // No hay usuario autenticado, mostrar login
             return const LoginScreen();
           } else {
-            // Usuario autenticado, mostrar pantalla principal
-            return const HomeScreen();
+            // Usuario autenticado, mostrar la pantalla principal con navegación
+            return const MainScreen();
           }
         }
         

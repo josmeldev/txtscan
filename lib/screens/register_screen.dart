@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
+// Ya no necesitamos importar home_screen.dart porque la navegación 
+// es manejada por auth_state_wrapper.dart
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -74,11 +75,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       
       if (user != null && context.mounted) {
-        // Navegar a la pantalla de inicio
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        // No necesitamos navegar manualmente, el AuthStateWrapper se encargará
+        // de dirigir al usuario a la MainScreen cuando detecte que está autenticado
       }
     } catch (e) {
       setState(() {

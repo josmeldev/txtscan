@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'dart:async';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   // Agregar manejo de errores no capturados
@@ -20,6 +21,16 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     print('Firebase inicializado correctamente');
+    
+    // Inicializar servicio de notificaciones
+    await NotificationService.initialize();
+    print('Servicio de notificaciones inicializado');
+    
+    // Obtener y mostrar el token FCM en consola
+    final token = await NotificationService.getToken();
+    print('=== TOKEN FCM ===');
+    print(token);
+    print('================');
   } catch (e, stackTrace) {
     print('Error al inicializar Firebase: $e');
     print('Stack trace: $stackTrace');

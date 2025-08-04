@@ -38,6 +38,7 @@ dependencies:
   # Firebase
   firebase_core: ^2.25.4
   firebase_auth: ^4.17.4
+  firebase_messaging: ^14.7.5  # Para notificaciones push
   cloud_firestore: ^4.15.4
   firebase_database: ^10.4.5  # Para Realtime Database
   firebase_storage: ^11.6.5    # Para almacenamiento de archivos (opcional)

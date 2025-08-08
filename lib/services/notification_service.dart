@@ -2,6 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -85,22 +87,74 @@ class NotificationService {
     // Marcar como procesado
     _processedMessages.add(messageId);
     
+    final messageText = message.notification?.body ?? 'Sin contenido';
+    
+    // Analizar con la API de smishing
+    print('Analizando mensaje con API...');
+    final apiResult = await _analyzeWithAPI(messageText);
+    
     // Crear datos del mensaje
     final messageData = {
       'messageId': messageId,
       'title': message.notification?.title ?? 'Sin título',
-      'body': message.notification?.body ?? 'Sin contenido',
+      'body': messageText,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'sender': message.from ?? 'Desconocido',
-      'isAnalyzed': false,
-      'isMalicious': false, // Por defecto false, se analizará con la API después
+      'isAnalyzed': apiResult['isAnalyzed'],
+      'isMalicious': apiResult['isMalicious'],
+      'apiResponse': apiResult['apiResponse'],
+      'error': apiResult['error'],
     };
+
+    print('Resultado del análisis: ${apiResult['isMalicious'] ? 'SMISHING' : 'SEGURO'}');
 
     // Guardar en Firebase
     await _saveMessage(messageData);
   }
 
-  // Guardar mensaje en Firebase
+  // Analizar mensaje con API de smishing
+  static Future<Map<String, dynamic>> _analyzeWithAPI(String messageText) async {
+    try {
+      // URL de tu API - usar 10.0.2.2 para emulador Android
+      final url = Uri.parse('http://10.0.2.2:8000/predict');
+      
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'texto': messageText,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'isAnalyzed': true,
+          'isMalicious': data['es_smishing'] ?? false,
+          'apiResponse': data,
+        };
+      } else {
+        print('Error en API: Status ${response.statusCode}');
+        return {
+          'isAnalyzed': false,
+          'isMalicious': false,
+          'error': 'API error: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      print('Error al llamar API de smishing: $e');
+      return {
+        'isAnalyzed': false,
+        'isMalicious': false,
+        'error': e.toString(),
+      };
+    }
+  }
   static Future<void> _saveMessage(Map<String, dynamic> messageData) async {
     try {
       final user = FirebaseAuth.instance.currentUser;

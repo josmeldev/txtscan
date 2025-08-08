@@ -43,6 +43,7 @@ dependencies:
   firebase_database: ^10.4.5  # Para Realtime Database
   firebase_storage: ^11.6.5    # Para almacenamiento de archivos (opcional)
   flutter_spinkit: ^5.2.0      # Para indicadores de carga
+  http: ^1.1.0                  # Para llamadas HTTP a la API
 
 dev_dependencies:
   flutter_test:

@@ -76,8 +76,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   Widget _buildMessageCard(Map<String, dynamic> message) {
     final DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(message['timestamp']);
-    final bool isAnalyzed = message['isAnalyzed'] ?? false;
-    final bool isMalicious = message['isMalicious'] ?? false;
+    final bool isMalicious = message['es_smishing'] ?? false;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -90,12 +89,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             Row(
               children: [
                 Icon(
-                  isAnalyzed 
-                    ? (isMalicious ? Icons.warning : Icons.check_circle)
-                    : Icons.hourglass_empty,
-                  color: isAnalyzed 
-                    ? (isMalicious ? Colors.red : Colors.green)
-                    : Colors.orange,
+                  isMalicious ? Icons.warning : Icons.check_circle,
+                  color: isMalicious ? Colors.red : Colors.green,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -126,25 +121,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isAnalyzed 
-                      ? (isMalicious ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1))
-                      : Colors.orange.withOpacity(0.1),
+                    color: isMalicious ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isAnalyzed 
-                        ? (isMalicious ? Colors.red : Colors.green)
-                        : Colors.orange,
+                      color: isMalicious ? Colors.red : Colors.green,
                       width: 1,
                     ),
                   ),
                   child: Text(
-                    isAnalyzed 
-                      ? (isMalicious ? 'SMISHING' : 'SEGURO')
-                      : 'ANALIZANDO...',
+                    isMalicious ? 'SMISHING' : 'SEGURO',
                     style: TextStyle(
-                      color: isAnalyzed 
-                        ? (isMalicious ? Colors.red : Colors.green)
-                        : Colors.orange,
+                      color: isMalicious ? Colors.red : Colors.green,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -159,34 +146,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ),
               ],
             ),
-            // Mostrar información de error si existe
-            if (message['error'] != null && message['error'].toString().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 16),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'Error API: ${message['error']}',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),

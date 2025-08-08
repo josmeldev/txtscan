@@ -93,17 +93,12 @@ class NotificationService {
     print('Analizando mensaje con API...');
     final apiResult = await _analyzeWithAPI(messageText);
     
-    // Crear datos del mensaje
+    // Crear datos del mensaje (solo lo esencial)
     final messageData = {
-      'messageId': messageId,
       'title': message.notification?.title ?? 'Sin título',
       'body': messageText,
+      'es_smishing': apiResult['isMalicious'],
       'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'sender': message.from ?? 'Desconocido',
-      'isAnalyzed': apiResult['isAnalyzed'],
-      'isMalicious': apiResult['isMalicious'],
-      'apiResponse': apiResult['apiResponse'],
-      'error': apiResult['error'],
     };
 
     print('Resultado del análisis: ${apiResult['isMalicious'] ? 'SMISHING' : 'SEGURO'}');

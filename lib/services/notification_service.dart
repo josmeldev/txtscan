@@ -90,11 +90,14 @@ class NotificationService {
     
     final messageText = message.notification?.body ?? 'Sin contenido';
     
+    // Iniciar medición del tiempo de detección
+    final startTime = DateTime.now();
+    
     // Analizar con la API de smishing
     print('Analizando mensaje con API...');
     final apiResult = await _analyzeWithAPI(messageText);
     
-    // Crear datos del mensaje (solo lo esencial)
+    // Crear datos del mensaje (sin tiempo_deteccion aún)
     final messageData = {
       'title': message.notification?.title ?? 'Sin título',
       'body': messageText,
@@ -112,6 +115,14 @@ class NotificationService {
       // Usar un delay pequeño para asegurar que el contexto esté disponible
       await Future.delayed(const Duration(milliseconds: 500));
       try {
+        // Calcular tiempo total hasta que aparece el popup (en segundos con decimales)
+        final endTime = DateTime.now();
+        final tiempoDeteccionMs = endTime.difference(startTime).inMilliseconds;
+        final tiempoDeteccion = tiempoDeteccionMs / 1000.0; // Convertir a segundos decimales
+        
+        // Actualizar el mensaje con el tiempo de detección
+        await _updateMessageWithDetectionTime(savedMessageId, tiempoDeteccion);
+        
         await ValidationService.showValidationDialog(
           savedMessageId,
           messageText,
@@ -207,6 +218,25 @@ class NotificationService {
   }
 
   // Obtener token FCM
+  // Actualizar mensaje con tiempo de detección
+  static Future<void> _updateMessageWithDetectionTime(String messageId, double tiempoDeteccion) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await _database
+            .child('users')
+            .child(user.uid)
+            .child('detected_messages')
+            .child(messageId)
+            .update({'tiempo_deteccion': tiempoDeteccion});
+        
+        print('Tiempo de detección actualizado: ${tiempoDeteccion.toStringAsFixed(2)}s');
+      }
+    } catch (e) {
+      print('Error al actualizar tiempo de detección: $e');
+    }
+  }
+
   static Future<String?> getToken() async {
     try {
       return await _messaging.getToken();

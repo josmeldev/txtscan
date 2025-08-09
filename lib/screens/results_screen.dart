@@ -228,7 +228,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   ),
                 ),
-                // Espaciado entre los dos badges
+                // Espaciado entre los badges
                 if (validationType != null) const SizedBox(width: 8),
                 // Estado de validación al lado del estado de detección
                 if (validationType != null)
@@ -246,6 +246,29 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       ValidationService.getValidationDescription(validationType),
                       style: TextStyle(
                         color: ValidationService.getValidationColor(validationType),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                // Espaciado para el tiempo de detección
+                if (message['tiempo_deteccion'] != null) const SizedBox(width: 8),
+                // Tiempo de detección al lado de los otros badges
+                if (message['tiempo_deteccion'] != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${(message['tiempo_deteccion'] as num).toStringAsFixed(2)}s',
+                      style: const TextStyle(
+                        color: Colors.blue,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),

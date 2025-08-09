@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../services/validation_service.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -77,6 +78,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget _buildMessageCard(Map<String, dynamic> message) {
     final DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(message['timestamp']);
     final bool isMalicious = message['es_smishing'] ?? false;
+    final String? validationType = message['validation_type'];
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -118,6 +120,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Estado de detección
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -137,14 +140,37 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   ),
                 ),
-                Text(
-                  '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                // Estado de validación
+                if (validationType != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: ValidationService.getValidationColor(validationType).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: ValidationService.getValidationColor(validationType),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      ValidationService.getValidationDescription(validationType),
+                      style: TextStyle(
+                        color: ValidationService.getValidationColor(validationType),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
               ],
+            ),
+            const SizedBox(height: 8),
+            // Fecha y hora
+            Text(
+              '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'services/notification_service.dart';
+import 'services/navigation_service.dart';
 
 void main() async {
   // Agregar manejo de errores no capturados
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TxtScan',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey, // Agregar el key global
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade900),
         useMaterial3: true,

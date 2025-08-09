@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'validation_service.dart';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -104,7 +105,22 @@ class NotificationService {
     print('Resultado del análisis: ${apiResult['isMalicious'] ? 'SMISHING' : 'SEGURO'}');
 
     // Guardar en Firebase
-    await _saveMessage(messageData);
+    final savedMessageId = await _saveMessage(messageData);
+    
+    // Mostrar popup de validación si se guardó correctamente
+    if (savedMessageId != null) {
+      // Usar un delay pequeño para asegurar que el contexto esté disponible
+      await Future.delayed(const Duration(milliseconds: 500));
+      try {
+        await ValidationService.showValidationDialog(
+          savedMessageId,
+          messageText,
+          apiResult['isMalicious'],
+        );
+      } catch (e) {
+        print('Error al mostrar dialog de validación: $e');
+      }
+    }
   }
 
   // Analizar mensaje con API de smishing
@@ -150,21 +166,25 @@ class NotificationService {
       };
     }
   }
-  static Future<void> _saveMessage(Map<String, dynamic> messageData) async {
+  static Future<String?> _saveMessage(Map<String, dynamic> messageData) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await _database
+        final ref = _database
             .child('users')
             .child(user.uid)
             .child('detected_messages')
-            .push()
-            .set(messageData);
+            .push();
         
-        print('Mensaje guardado en Firebase');
+        await ref.set(messageData);
+        
+        print('Mensaje guardado en Firebase con ID: ${ref.key}');
+        return ref.key; // Retornar el ID generado
       }
+      return null;
     } catch (e) {
       print('Error al guardar mensaje: $e');
+      return null;
     }
   }
 

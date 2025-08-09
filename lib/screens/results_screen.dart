@@ -75,6 +75,70 @@ class _ResultsScreenState extends State<ResultsScreen> {
     await _loadMessages();
   }
 
+  Future<void> _deleteMessage(String messageId) async {
+    try {
+      // Mostrar diálogo de confirmación
+      final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirmar eliminación'),
+            content: const Text('¿Estás seguro de que quieres eliminar este mensaje?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Eliminar'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldDelete == true) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          // Eliminar de Firebase
+          await _database
+              .child('users')
+              .child(user.uid)
+              .child('detected_messages')
+              .child(messageId)
+              .remove();
+
+          // Actualizar la lista localmente
+          setState(() {
+            _messages.removeWhere((message) => message['id'] == messageId);
+          });
+
+          // Mostrar mensaje de confirmación
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Mensaje eliminado correctamente'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      print('Error al eliminar mensaje: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al eliminar el mensaje'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildMessageCard(Map<String, dynamic> message) {
     final DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(message['timestamp']);
     final bool isMalicious = message['es_smishing'] ?? false;
@@ -106,6 +170,31 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                // Menú de 3 puntos
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _deleteMessage(message['id']);
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red, size: 18),
+                          SizedBox(width: 8),
+                          Text('Eliminar'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -165,13 +254,18 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            // Fecha y hora
-            Text(
-              '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+            // Fecha y hora alineada a la derecha
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

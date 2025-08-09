@@ -118,7 +118,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
             const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Estado de detección
                 Container(
@@ -140,7 +139,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   ),
                 ),
-                // Estado de validación
+                // Espaciado entre los dos badges
+                if (validationType != null) const SizedBox(width: 8),
+                // Estado de validación al lado del estado de detección
                 if (validationType != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -156,7 +157,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       ValidationService.getValidationDescription(validationType),
                       style: TextStyle(
                         color: ValidationService.getValidationColor(validationType),
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

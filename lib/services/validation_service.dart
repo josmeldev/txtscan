@@ -151,15 +151,15 @@ class ValidationService {
   static String getValidationDescription(String validationType) {
     switch (validationType) {
       case 'VP':
-        return 'Verdadero Positivo';
+        return 'VERDADERO POSITIVO';
       case 'VN':
-        return 'Verdadero Negativo';
+        return 'VERDADERO NEGATIVO';
       case 'FP':
-        return 'Falso Positivo';
+        return 'FALSO POSITIVO';
       case 'FN':
-        return 'Falso Negativo';
+        return 'FALSO NEGATIVO';
       default:
-        return 'Sin validar';
+        return 'SIN VALIDAR';
     }
   }
 

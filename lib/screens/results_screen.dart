@@ -258,17 +258,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.grey.shade600.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.blue,
+                        color: Colors.grey.shade600,
                         width: 1,
                       ),
                     ),
                     child: Text(
                       '${(message['tiempo_deteccion'] as num).toStringAsFixed(2)}s',
-                      style: const TextStyle(
-                        color: Colors.blue,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),

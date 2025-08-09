@@ -167,11 +167,13 @@ class ValidationService {
   static Color getValidationColor(String validationType) {
     switch (validationType) {
       case 'VP':
+        return Colors.purple; // Verdadero Positivo - Púrpura
       case 'VN':
-        return Colors.green; // Correctos
+        return Colors.indigo; // Verdadero Negativo - Índigo (azul oscuro)
       case 'FP':
+        return Colors.orange; // Falso Positivo - Naranja
       case 'FN':
-        return Colors.orange; // Incorrectos
+        return Colors.blue; // Falso Negativo - Azul
       default:
         return Colors.grey; // Sin validar
     }

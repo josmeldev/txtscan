@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'falsos_positivos_screen.dart';
 import 'precision_screen.dart';
 import 'tiempo_promedio_screen.dart';
+import 'falsos_negativos_screen.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -86,11 +87,21 @@ class ReportsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: _buildStatCard(
-                      title: 'Tasa de Falsos\nNegativos',
-                      value: '7%',
-                      valueColor: Colors.red,
-                      backgroundColor: Colors.grey.shade100,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FalsosNegativosScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildStatCard(
+                        title: 'Tasa de Falsos\nNegativos',
+                        value: '7%',
+                        valueColor: Colors.red,
+                        backgroundColor: Colors.grey.shade100,
+                      ),
                     ),
                   ),
                 ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'falsos_positivos_screen.dart';
+import 'precision_screen.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -21,20 +23,40 @@ class ReportsScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(
-                      title: 'Porcentaje de\nFalsos\nPositivos',
-                      value: '8%',
-                      valueColor: Colors.red,
-                      backgroundColor: Colors.grey.shade100,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FalsosPositivosScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildStatCard(
+                        title: 'Porcentaje de\nFalsos\nPositivos',
+                        value: '8%',
+                        valueColor: Colors.red,
+                        backgroundColor: Colors.grey.shade100,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: _buildStatCard(
-                      title: 'Porcentaje de\nPrecisión',
-                      value: '92%',
-                      valueColor: Colors.green,
-                      backgroundColor: Colors.grey.shade100,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrecisionScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildStatCard(
+                        title: 'Porcentaje de\nPrecisión',
+                        value: '92%',
+                        valueColor: Colors.green,
+                        backgroundColor: Colors.grey.shade100,
+                      ),
                     ),
                   ),
                 ],

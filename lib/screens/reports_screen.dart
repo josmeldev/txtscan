@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'falsos_positivos_screen.dart';
 import 'precision_screen.dart';
+import 'tiempo_promedio_screen.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -66,11 +67,21 @@ class ReportsScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(
-                      title: 'Tiempo\nPromedio de\nRespuesta',
-                      value: '3s',
-                      valueColor: Colors.green,
-                      backgroundColor: Colors.grey.shade100,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TiempoPromedioScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildStatCard(
+                        title: 'Tiempo\nPromedio de\nRespuesta',
+                        value: '3s',
+                        valueColor: Colors.green,
+                        backgroundColor: Colors.grey.shade100,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),

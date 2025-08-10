@@ -15,7 +15,6 @@ class _TiempoPromedioScreenState extends State<TiempoPromedioScreen> {
   List<Map<String, dynamic>> _datosTabla = [];
   bool _isLoading = false;
   double _tiempoPromedioTotal = 0.0;
-  int _totalMensajes = 0;
 
   @override
   void initState() {
@@ -95,8 +94,8 @@ class _TiempoPromedioScreenState extends State<TiempoPromedioScreen> {
 
     // Calcular promedios por fecha y totales
     _datosTabla.clear();
-    double tiempoTotalGeneral = 0.0;
-    _totalMensajes = 0;
+    double sumaTiemposPromedio = 0.0;
+    int diasConDatos = 0;
 
     datosPorFecha.forEach((fecha, datos) {
       final mensajes = datos['mensajes'] as int;
@@ -109,12 +108,15 @@ class _TiempoPromedioScreenState extends State<TiempoPromedioScreen> {
         'tiempoPromedio': tiempoPromedio,
       });
       
-      tiempoTotalGeneral += tiempoTotal;
-      _totalMensajes += mensajes;
+      // Sumar los promedios de cada día (no los tiempos totales)
+      if (tiempoPromedio > 0) {
+        sumaTiemposPromedio += tiempoPromedio;
+        diasConDatos++;
+      }
     });
 
-    // Calcular tiempo promedio total
-    _tiempoPromedioTotal = _totalMensajes > 0 ? tiempoTotalGeneral / _totalMensajes : 0.0;
+    // Calcular tiempo promedio total: promedio de los promedios diarios
+    _tiempoPromedioTotal = diasConDatos > 0 ? sumaTiemposPromedio / diasConDatos : 0.0;
 
     // Ordenar por fecha (más reciente primero)
     _datosTabla.sort((a, b) {
@@ -241,38 +243,6 @@ class _TiempoPromedioScreenState extends State<TiempoPromedioScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
-                // Tiempo promedio total
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Tiempo Promedio Total:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Text(
-                        _formatearTiempo(_tiempoPromedioTotal),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
                 
                 // Tabla de datos
                 Container(

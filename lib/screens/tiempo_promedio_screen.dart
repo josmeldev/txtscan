@@ -265,7 +265,7 @@ class _TiempoPromedioScreenState extends State<TiempoPromedioScreen> {
                           children: [
                             Expanded(flex: 2, child: Text('Fecha', style: TextStyle(fontWeight: FontWeight.bold))),
                             Expanded(child: Text('Mensajes', style: TextStyle(fontWeight: FontWeight.bold))),
-                            Expanded(child: Text('Tiempo', style: TextStyle(fontWeight: FontWeight.bold))),
+                            Expanded(child: Text('T promedio', style: TextStyle(fontWeight: FontWeight.bold))),
                           ],
                         ),
                       ),

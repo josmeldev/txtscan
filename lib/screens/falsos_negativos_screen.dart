@@ -20,9 +20,10 @@ class _FalsosNegativosScreenState extends State<FalsosNegativosScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicializar con fechas por defecto (último mes)
-    _fechaFin = DateTime.now();
-    _fechaInicio = DateTime.now().subtract(const Duration(days: 30));
+    // Inicializar con fechas por defecto (solo día actual)
+    final now = DateTime.now();
+    _fechaInicio = DateTime(now.year, now.month, now.day); // Inicio del día actual
+    _fechaFin = DateTime(now.year, now.month, now.day, 23, 59, 59); // Final del día actual
     _cargarDatos();
   }
 

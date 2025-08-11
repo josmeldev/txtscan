@@ -24,21 +24,36 @@ class NotificationService {
       return;
     }
 
-    // Solicitar permisos
-    NotificationSettings settings = await _messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+    try {
+      // Primero verificar el estado actual de los permisos
+      NotificationSettings settings = await _messaging.getNotificationSettings();
+      
+      // Solo solicitar permisos si no están determinados
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        print('Solicitando permisos de notificación por primera vez...');
+        settings = await _messaging.requestPermission(
+          alert: true,
+          announcement: false,
+          badge: true,
+          carPlay: false,
+          criticalAlert: false,
+          provisional: false,
+          sound: true,
+        );
+        print('Permisos solicitados: ${settings.authorizationStatus}');
+      } else {
+        print('Permisos ya configurados: ${settings.authorizationStatus}');
+      }
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('Usuario otorgó permisos para notificaciones');
-    } else {
-      print('Usuario no otorgó permisos para notificaciones');
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        print('Usuario tiene permisos para notificaciones');
+      } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        print('Usuario negó permisos para notificaciones');
+      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+        print('Usuario tiene permisos provisionales para notificaciones');
+      }
+    } catch (e) {
+      print('Error al verificar/solicitar permisos: $e');
     }
 
     // Configurar listeners de mensajes (solo una vez)

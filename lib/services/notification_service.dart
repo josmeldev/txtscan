@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import 'validation_service.dart';
+import 'navigation_service.dart';
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -152,8 +154,20 @@ class NotificationService {
   // Analizar mensaje con API de smishing
   static Future<Map<String, dynamic>> _analyzeWithAPI(String messageText) async {
     try {
-      // URL de tu API - usar 10.0.2.2 para emulador Android
+      print('Iniciando análisis con API...');
+      
+      // URL de tu API
       final url = Uri.parse('https://txtscan-api.onrender.com/predict');
+      
+      // Mostrar mensaje informativo después de 8 segundos si aún no hay respuesta
+      Timer? slowResponseTimer;
+      bool isSlowResponse = false;
+      
+      slowResponseTimer = Timer(const Duration(seconds: 7), () {
+        isSlowResponse = true;
+        print('API tardando más de lo normal - mostrando mensaje informativo');
+        _showServiceActivatingMessage();
+      });
       
       final response = await http.post(
         url,
@@ -163,7 +177,15 @@ class NotificationService {
         body: jsonEncode({
           'texto': messageText,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 32)); // Timeout más generoso
+      
+      // Cancelar el timer si la respuesta llega a tiempo
+      slowResponseTimer.cancel();
+      
+      // Si se mostró el mensaje de "activando", ocultarlo
+      if (isSlowResponse) {
+        _hideServiceActivatingMessage();
+      }
 
       print('API Response Status: ${response.statusCode}');
       print('API Response Body: ${response.body}');
@@ -185,11 +207,60 @@ class NotificationService {
       }
     } catch (e) {
       print('Error al llamar API de smishing: $e');
+      
+      // Asegurarse de ocultar el mensaje si hay error
+      _hideServiceActivatingMessage();
+      
       return {
         'isAnalyzed': false,
         'isMalicious': false,
         'error': e.toString(),
       };
+    }
+  }
+
+  // Mostrar mensaje de "Servicio activándose"
+  static void _showServiceActivatingMessage() {
+    final context = NavigationService.navigatorKey.currentContext;
+    if (context != null) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                const Text(
+                  'El servicio se está activando',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Por favor espera un momento...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  // Ocultar mensaje de "Servicio activándose"
+  static void _hideServiceActivatingMessage() {
+    final context = NavigationService.navigatorKey.currentContext;
+    if (context != null) {
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
   static Future<String?> _saveMessage(Map<String, dynamic> messageData) async {

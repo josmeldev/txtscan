@@ -153,7 +153,7 @@ class NotificationService {
   static Future<Map<String, dynamic>> _analyzeWithAPI(String messageText) async {
     try {
       // URL de tu API - usar 10.0.2.2 para emulador Android
-      final url = Uri.parse('http://10.0.2.2:8000/predict');
+      final url = Uri.parse('https://txtscan-api.onrender.com/predict');
       
       final response = await http.post(
         url,
@@ -163,7 +163,7 @@ class NotificationService {
         body: jsonEncode({
           'texto': messageText,
         }),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 20));
 
       print('API Response Status: ${response.statusCode}');
       print('API Response Body: ${response.body}');

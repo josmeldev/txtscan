@@ -1,4 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,114 +9,58 @@ import 'validation_service.dart';
 import 'navigation_service.dart';
 
 class NotificationService {
-  static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  // static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static final DatabaseReference _database = FirebaseDatabase.instance.ref();
   static bool _isDetecting = false;
   static final ValueNotifier<bool> isDetectingNotifier = ValueNotifier<bool>(false);
   static bool _isInitialized = false; // Para evitar múltiples inicializaciones
   static final Set<String> _processedMessages = <String>{}; // Para evitar duplicados
-  
+
   static bool get isDetecting => _isDetecting;
-  
-  // Inicializar el servicio de notificaciones
+
+  // Inicializar el servicio de notificaciones locales (SMS)
   static Future<void> initialize() async {
-    // Evitar múltiples inicializaciones
     if (_isInitialized) {
       print('NotificationService ya está inicializado');
       return;
     }
-
-    try {
-      // Primero verificar el estado actual de los permisos
-      NotificationSettings settings = await _messaging.getNotificationSettings();
-      
-      // Solo solicitar permisos si no están determinados
-      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
-        print('Solicitando permisos de notificación por primera vez...');
-        settings = await _messaging.requestPermission(
-          alert: true,
-          announcement: false,
-          badge: true,
-          carPlay: false,
-          criticalAlert: false,
-          provisional: false,
-          sound: true,
-        );
-        print('Permisos solicitados: ${settings.authorizationStatus}');
-      } else {
-        print('Permisos ya configurados: ${settings.authorizationStatus}');
-      }
-
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('Usuario tiene permisos para notificaciones');
-      } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        print('Usuario negó permisos para notificaciones');
-      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-        print('Usuario tiene permisos provisionales para notificaciones');
-      }
-    } catch (e) {
-      print('Error al verificar/solicitar permisos: $e');
-    }
-
-    // Configurar listeners de mensajes (solo una vez)
-    _setupMessageListeners();
-    
+    // Aquí podrías inicializar el listener de notificaciones locales si es necesario
     _isInitialized = true;
-    print('NotificationService inicializado correctamente');
+    print('NotificationService inicializado correctamente (modo SMS local)');
   }
 
-  // Configurar listeners para mensajes
-  static void _setupMessageListeners() {
-    // Cuando la app está en primer plano
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (_isDetecting) {
-        processMessage(message);
-      }
-    });
-
-    // Cuando la app está en segundo plano pero no cerrada
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (_isDetecting) {
-        processMessage(message);
-      }
-    });
-
-    // Cuando la app está completamente cerrada
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  }
-
-  // Procesar mensajes recibidos (ahora público para el background handler)
-  static Future<void> processMessage(RemoteMessage message) async {
+  // Procesar notificación local de SMS (title, body)
+  static Future<void> processSMSNotification({required String title, required String body}) async {
     if (!_isDetecting) return;
-    
+
     // Crear un ID único para el mensaje
-    final messageId = '${message.messageId}_${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}';
-    
+    final messageId = '${title}_${body}_${DateTime.now().millisecondsSinceEpoch}';
+
     // Verificar si ya procesamos este mensaje
     if (_processedMessages.contains(messageId)) {
-      print('Mensaje ya procesado, ignorando duplicado: $messageId');
+      print('Mensaje SMS ya procesado, ignorando duplicado: $messageId');
       return;
     }
-    
-    print('Procesando mensaje: ${message.notification?.title}');
-    print('Cuerpo: ${message.notification?.body}');
+
+    print('Procesando SMS: $title');
+    print('Cuerpo: $body');
     print('Message ID: $messageId');
-    
+
     // Marcar como procesado
     _processedMessages.add(messageId);
-    
-    final messageText = message.notification?.body ?? 'Sin contenido';
-    
+
+    final messageText = body;
+
     // Iniciar medición del tiempo de detección
     final startTime = DateTime.now();
-    
+
     // Analizar con la API de smishing
-    print('Analizando mensaje con API...');
+    print('Analizando SMS con API...');
     final apiResult = await _analyzeWithAPI(messageText);
-    
+
     // Crear datos del mensaje (sin tiempo_deteccion aún)
     final messageData = {
-      'title': message.notification?.title ?? 'Sin título',
+      'title': title,
       'body': messageText,
       'es_smishing': apiResult['isMalicious'],
       'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -126,20 +70,17 @@ class NotificationService {
 
     // Guardar en Firebase
     final savedMessageId = await _saveMessage(messageData);
-    
+
     // Mostrar popup de validación si se guardó correctamente
     if (savedMessageId != null) {
-      // Usar un delay pequeño para asegurar que el contexto esté disponible
       await Future.delayed(const Duration(milliseconds: 500));
       try {
-        // Calcular tiempo total hasta que aparece el popup (en segundos con decimales)
         final endTime = DateTime.now();
         final tiempoDeteccionMs = endTime.difference(startTime).inMilliseconds;
-        final tiempoDeteccion = tiempoDeteccionMs / 1000.0; // Convertir a segundos decimales
-        
-        // Actualizar el mensaje con el tiempo de detección
+        final tiempoDeteccion = tiempoDeteccionMs / 1000.0;
+
         await _updateMessageWithDetectionTime(savedMessageId, tiempoDeteccion);
-        
+
         await ValidationService.showValidationDialog(
           savedMessageId,
           messageText,
@@ -155,20 +96,14 @@ class NotificationService {
   static Future<Map<String, dynamic>> _analyzeWithAPI(String messageText) async {
     try {
       print('Iniciando análisis con API...');
-      
-      // URL de tu API
       final url = Uri.parse('https://txtscan-api.onrender.com/predict');
-      
-      // Mostrar mensaje informativo después de 8 segundos si aún no hay respuesta
       Timer? slowResponseTimer;
       bool isSlowResponse = false;
-      
       slowResponseTimer = Timer(const Duration(seconds: 7), () {
         isSlowResponse = true;
         print('API tardando más de lo normal - mostrando mensaje informativo');
         _showServiceActivatingMessage();
       });
-      
       final response = await http.post(
         url,
         headers: {
@@ -177,19 +112,13 @@ class NotificationService {
         body: jsonEncode({
           'texto': messageText,
         }),
-      ).timeout(const Duration(seconds: 32)); // Timeout más generoso
-      
-      // Cancelar el timer si la respuesta llega a tiempo
+      ).timeout(const Duration(seconds: 32));
       slowResponseTimer.cancel();
-      
-      // Si se mostró el mensaje de "activando", ocultarlo
       if (isSlowResponse) {
         _hideServiceActivatingMessage();
       }
-
       print('API Response Status: ${response.statusCode}');
       print('API Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return {
@@ -207,10 +136,7 @@ class NotificationService {
       }
     } catch (e) {
       print('Error al llamar API de smishing: $e');
-      
-      // Asegurarse de ocultar el mensaje si hay error
       _hideServiceActivatingMessage();
-      
       return {
         'isAnalyzed': false,
         'isMalicious': false,
@@ -289,18 +215,15 @@ class NotificationService {
   static Future<void> startDetection() async {
     _isDetecting = true;
     isDetectingNotifier.value = true;
-    print('Detección iniciada');
+    print('Detección de SMS iniciada');
   }
 
   // Parar detección
   static Future<void> stopDetection() async {
     _isDetecting = false;
     isDetectingNotifier.value = false;
-    
-    // Limpiar el caché de mensajes procesados
     _processedMessages.clear();
-    
-    print('Detección detenida y caché limpiado');
+    print('Detección de SMS detenida y caché limpiado');
   }
 
   // Obtener token FCM
@@ -323,23 +246,5 @@ class NotificationService {
     }
   }
 
-  static Future<String?> getToken() async {
-    try {
-      return await _messaging.getToken();
-    } catch (e) {
-      print('Error al obtener token: $e');
-      return null;
-    }
-  }
-}
-
-// Handler para mensajes en segundo plano
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Mensaje en segundo plano: ${message.messageId}');
-  
-  // Solo procesar si la detección está activa
-  if (NotificationService.isDetecting) {
-    await NotificationService.processMessage(message);
-  }
+  // El método getToken y el handler de mensajes en segundo plano se eliminan porque ya no se usan Firebase Messaging
 }

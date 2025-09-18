@@ -29,10 +29,16 @@ class SMSListenerService {
   static void _callback(NotificationEvent event) {
     print('[SMSListenerService] [CALLBACK] Evento recibido: $event');
     if (event.packageName == 'com.google.android.apps.messaging') {
-      final title = event.title ?? 'Sin título';
-      final body = event.text ?? 'Sin contenido';
-      lastSmsNotifier.value = {'title': title, 'body': body};
-      NotificationService.processSMSNotification(title: title, body: body);
+      final title = event.title ?? '';
+      final body = event.text ?? '';
+      final isNumericTitle = RegExp(r'^\d{5,}$').hasMatch(title); // 5+ dígitos
+      final isSystemMsg = title.toLowerCase().contains('messages') ||
+                         title.toLowerCase().contains('background') ||
+                         body.toLowerCase().contains('background');
+      if (isNumericTitle && body.isNotEmpty && !isSystemMsg) {
+        lastSmsNotifier.value = {'title': title, 'body': body};
+        NotificationService.processSMSNotification(title: title, body: body);
+      }
     }
   // Enviar a UI si es necesario
   // final send = IsolateNameServer.lookupPortByName("_listener_");
@@ -47,11 +53,17 @@ class SMSListenerService {
     _subscription = NotificationsListener.receivePort?.listen((event) {
       print('[SMSListenerService] Evento recibido en UI: $event');
       if (event is NotificationEvent && event.packageName == 'com.google.android.apps.messaging') {
-        final title = event.title ?? 'Sin título';
-        final body = event.text ?? 'Sin contenido';
-        print('[SMSListenerService] Notificación detectada: title="$title" body="$body" package=${event.packageName}');
-        lastSmsNotifier.value = {'title': title, 'body': body};
-        NotificationService.processSMSNotification(title: title, body: body);
+        final title = event.title ?? '';
+        final body = event.text ?? '';
+        final isNumericTitle = RegExp(r'^\d{5,}$').hasMatch(title); // 5+ dígitos
+        final isSystemMsg = title.toLowerCase().contains('messages') ||
+                           title.toLowerCase().contains('background') ||
+                           body.toLowerCase().contains('background');
+        if (isNumericTitle && body.isNotEmpty && !isSystemMsg) {
+          print('[SMSListenerService] Notificación detectada: title="$title" body="$body" package=${event.packageName}');
+          lastSmsNotifier.value = {'title': title, 'body': body};
+          NotificationService.processSMSNotification(title: title, body: body);
+        }
       }
     });
     print('SMSListenerService (flutter_notification_listener) iniciado');
